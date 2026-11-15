@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>忠孝新生聚餐三選一｜美食指南</title>
+    <!-- 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入 Google Fonts: Noto Sans TC 與 Noto Serif TC 營造文青雜誌質感 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=Noto+Serif+TC:wght@600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        paper: '#FAF7F2',       // 米白紙張底色
+                        cardBg: '#FFFFFF',      // 純白卡片
+                        espresso: '#3B2F2F',    // 深焙咖啡色主文字
+                        mocha: '#6E5D55',       // 摩卡棕次要文字
+                        terracotta: '#D96B43',  // 溫暖陶土橘紅（重點強調）
+                        matcha: '#5A7D65',      // 抹茶綠（標籤與次重點）
+                        sand: '#EDE6DB',        // 暖沙色分隔線與底框
+                    },
+                    fontFamily: {
+                        sans: ['"Noto Sans TC"', 'sans-serif'],
+                        serif: ['"Noto Serif TC"', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #FAF7F2;
+            color: #3B2F2F;
+            -webkit-tap-highlight-color: transparent;
+        }
+        /* 隱藏橫向捲軸但保留滑動功能 */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        /* 卡片微幅浮動過渡 */
+        .restaurant-card {
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+    </style>
+</head>
+<body class="antialiased pb-32">
+
+    <!-- 頂部標題區 -->
+    <header class="bg-paper/95 backdrop-blur-md sticky top-0 z-30 border-b border-sand px-4 pt-5 pb-3">
+        <div class="max-w-xl mx-auto">
+            <div class="flex items-center justify-between mb-1">
+                <span class="inline-flex items-center gap-1.5 text-xs font-bold tracking-wider uppercase text-terracotta bg-terracotta/10 px-2.5 py-1 rounded-full">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    捷運忠孝新生站周邊
+                </span>
+                <span class="text-xs font-medium text-mocha bg-sand/70 px-2.5 py-1 rounded-full">
+                    💵 貼心提醒：三間皆僅收現金
+                </span>
+            </div>
+            <h1 class="font-serif text-2xl sm:text-3xl font-bold text-espresso tracking-tight mt-2">
+                忠孝新生聚餐三選一
+            </h1>
+            <p class="text-xs sm:text-sm text-mocha mt-1">
+                點選下方情境快速找餐廳，勾選想吃的店一鍵複製回覆群組！
+            </p>
+
+            <!-- 快速篩選 / 情境推薦標籤 -->
+            <div class="flex items-center gap-2 overflow-x-auto no-scrollbar pt-3 pb-1" id="filter-container">
+                <button onclick="filterRestaurants('all')" data-filter="all" class="filter-btn active shrink-0 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all bg-espresso text-paper shadow-sm">
+                    全部顯示 (3)
+                </button>
+                <button onclick="filterRestaurants('shibafu')" data-filter="shibafu" class="filter-btn shrink-0 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all bg-white text-espresso border border-sand hover:border-matcha">
+                    🌿 適合聊天 / 有素食
+                </button>
+                <button onclick="filterRestaurants('yupin')" data-filter="yupin" class="filter-btn shrink-0 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all bg-white text-espresso border border-sand hover:border-terracotta">
+                    🥟 高CP值 / 晚點吃
+                </button>
+                <button onclick="filterRestaurants('morimoto')" data-filter="morimoto" class="filter-btn shrink-0 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all bg-white text-espresso border border-sand hover:border-espresso">
+                    🍜 大食量 / 快速用餐
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主要內容區：餐廳卡片列表 -->
+    <main class="max-w-xl mx-auto px-4 pt-5 space-y-5" id="restaurant-list">
+        <!-- 卡片將由 JavaScript 動態渲染，確保結構乾淨且互動同步 -->
+    </main>
+
+    <!-- 底部互動決定小工具（固定於視窗底部） -->
+    <div class="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-md border-t border-sand shadow-[0_-4px_20px_rgba(59,47,47,0.08)] px-4 py-3">
+        <div class="max-w-xl mx-auto">
+            <div class="flex items-center justify-between gap-3">
+                <div class="flex-1 min-w-0">
+                    <div class="text-xs font-medium text-mocha flex items-center gap-1.5">
+                        <span>🗳️ 我的聚餐投票：</span>
+                        <span id="selected-count" class="text-terracotta font-bold">尚未選擇</span>
+                    </div>
+                    <p id="selected-preview" class="text-sm font-bold text-espresso truncate mt-0.5">
+                        請在上方卡片勾選你想吃的餐廳
+                    </p>
+                </div>
+                <button id="copy-vote-btn" onclick="copyVoteToClipboard()" disabled class="shrink-0 px-4 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-1.5 bg-sand text-mocha cursor-not-allowed">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3"/></svg>
+                    <span>複製回覆群組</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 自訂 Toast 提示框（取代 alert） -->
+    <div id="toast" class="fixed top-20 left-1/2 -translate-x-1/2 z-50 pointer-events-none opacity-0 transition-all duration-300 transform -translate-y-2">
+        <div class="bg-espresso text-paper px-4 py-2.5 rounded-2xl shadow-lg text-sm font-medium flex items-center gap-2">
+            <span class="text-matcha bg-white rounded-full p-0.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+            </span>
+            <span id="toast-message">已複製投票結果！快貼到 LINE 群組吧</span>
+        </div>
+    </div>
+
+    <script>
+        // 餐廳資料庫
+        const restaurants = [
+            {
+                id: 'shibafu',
+                number: '01',
+                name: '芝生食堂（忠孝新生店）',
+                shortName: '芝生食堂',
+                category: '日式健康定食',
+                scenarioHint: '適合聊天 / 有素食夥伴',
+                themeColor: 'matcha',
+                tags: ['日式健康定食', '全素/蛋奶素友善', '建議訂位'],
+                highlights: '清爽無負擔日式定食（附5樣小菜+湯）、栗子南瓜雞肉鍋、海鮮與牛排主餐、甜點好評。',
+                vibe: '環境整潔舒適、充滿溫馨感，氣氛輕鬆，最適合坐下來好好吃飯聊天。',
+                hours: '每日 11:30 – 21:30（無午休）',
+                address: '台北市中正區忠孝東路二段134巷1號',
+                note: '尖峰時段易客滿建議提前訂位；僅收現金。',
+                mapUrl: 'https://www.google.com/maps/search/?api=1&query=芝生食堂+忠孝新生店',
+                // 內嵌文青風格插畫 SVG
+                illustration: `<svg class="w-12 h-12 text-matcha shrink-0" viewBox="0 0 64 64" fill="none">
+                    <rect width="64" height="64" rx="16" fill="#5A7D65" fill-opacity="0.12"/>
+                    <path d="M16 34C16 42.8366 23.1634 50 32 50C40.8366 50 48 42.8366 48 34H16Z" fill="#5A7D65"/>
+                    <path d="M22 28C22 25 25 23 25 20M32 27C32 24 35 22 35 19M42 28C42 25 45 23 45 20" stroke="#5A7D65" stroke-width="2.5" stroke-linecap="round"/>
+                    <rect x="24" y="50" width="16" height="3" rx="1.5" fill="#3B2F2F"/>
+                </svg>`
+            },
+            {
+                id: 'yupin',
+                number: '02',
+                name: '御品（原玖伍）川味牛肉麵店',
+                shortName: '御品牛肉麵',
+                category: '台式經典小吃',
+                scenarioHint: '高CP值 / 晚點吃首選',
+                themeColor: 'terracotta',
+                tags: ['台式經典小吃', '高CP值', '營業最晚'],
+                highlights: '川味紅燒/清燉牛肉麵、牛腱麵（肉嫩湯濃）、煎餃、湯餃與各類小菜，內用附免費飲料。',
+                vibe: '巷弄高人氣老字號，環境乾淨明亮、家常親切，出餐快速、價格親民。',
+                hours: '每日 11:00 – 22:30（無午休）',
+                address: '台北市中正區新生南路一段54巷22號',
+                note: '座位數較少，尖峰時段易客滿；僅收現金。',
+                mapUrl: 'https://www.google.com/maps/search/?api=1&query=御品(原玖伍)川味牛肉麵店',
+                illustration: `<svg class="w-12 h-12 text-terracotta shrink-0" viewBox="0 0 64 64" fill="none">
+                    <rect width="64" height="64" rx="16" fill="#D96B43" fill-opacity="0.12"/>
+                    <path d="M14 32C14 41.9411 22.0589 50 32 50C41.9411 50 50 41.9411 50 32H14Z" fill="#D96B43"/>
+                    <path d="M18 28H46" stroke="#3B2F2F" stroke-width="2.5" stroke-linecap="round"/>
+                    <circle cx="26" cy="24" r="3" fill="#D96B43"/>
+                    <circle cx="38" cy="24" r="3" fill="#D96B43"/>
+                    <path d="M22 50H42" stroke="#3B2F2F" stroke-width="3" stroke-linecap="round"/>
+                </svg>`
+            },
+            {
+                id: 'morimoto',
+                number: '03',
+                name: '森本家拉麵',
+                shortName: '森本家拉麵',
+                category: '懷舊日式拉麵',
+                scenarioHint: '大食量加麵 / 快速用餐',
+                themeColor: 'espresso',
+                tags: ['懷舊日式拉麵', '免費加麵', '食券機點餐'],
+                highlights: '平價拉麵（約 $160~$240），最大亮點是可「免費加麵」或換成綜合蔬菜，另有炸雞等配菜。',
+                vibe: '經營超過二十年的老牌拉麵館，環境安靜樸實、冷氣涼爽，門口使用食券機點餐，適合快速用餐。',
+                hours: '週一 11:30-15:00、17:00-22:00；週二至週五 11:30-15:00、17:00-21:00；週六日 11:30-21:00',
+                address: '台北市中正區忠孝東路二段134巷20號',
+                note: '偏傳統台日式口味；接近打烊炸物可能提早售完；僅收現金。',
+                mapUrl: 'https://www.google.com/maps/search/?api=1&query=森本家拉麵+忠孝新生',
+                illustration: `<svg class="w-12 h-12 text-espresso shrink-0" viewBox="0 0 64 64" fill="none">
+                    <rect width="64" height="64" rx="16" fill="#3B2F2F" fill-opacity="0.1"/>
+                    <path d="M16 35C16 43.8366 23.1634 51 32 51C40.8366 51 48 43.8366 48 35H16Z" fill="#3B2F2F"/>
+                    <path d="M22 20V31M27 20V31M32 20V31" stroke="#D96B43" stroke-width="2.5" stroke-linecap="round"/>
+                    <path d="M18 22L46 18M18 26L46 23" stroke="#3B2F2F" stroke-width="2.5" stroke-linecap="round"/>
+                </svg>`
+            }
+        ];
+
+        // 狀態管理
+        let currentFilter = 'all';
+        let selectedIds = new Set();
+        let expandedIds = new Set(['shibafu', 'yupin', 'morimoto']); // 預設全部展開方便手機快速瀏覽，也可收合
+
+        // 渲染餐廳卡片
+        function renderRestaurants() {
+            const container = document.getElementById('restaurant-list');
+            container.innerHTML = '';
+
+            const filtered = currentFilter === 'all' 
+                ? restaurants 
+                : restaurants.filter(r => r.id === currentFilter);
+
+            filtered.forEach(item => {
+                const isSelected = selectedIds.has(item.id);
+                const isExpanded = expandedIds.has(item.id);
+
+                // 標籤樣式設定
+                const badgeStyle = item.themeColor === 'matcha' 
+                    ? 'bg-matcha/15 text-matcha' 
+                    : item.themeColor === 'terracotta' 
+                        ? 'bg-terracotta/15 text-terracotta' 
+                        : 'bg-espresso/10 text-espresso';
+
+                const cardBorder = isSelected 
+                    ? 'border-2 border-terracotta ring-4 ring-terracotta/10' 
+                    : 'border border-sand';
+
+                const cardHtml = `
+                <article class="restaurant-card bg-cardBg rounded-2xl p-4 sm:p-5 shadow-sm ${cardBorder}" id="card-${item.id}">
+                    <!-- 卡片頂部：編號、情境推薦與投票勾選鈕 -->
+                    <div class="flex items-start justify-between gap-3">
+                        <div class="flex items-center gap-3">
+                            ${item.illustration}
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <span class="font-serif text-xs font-bold text-mocha">NO.${item.number}</span>
+                                    <span class="text-xs font-bold px-2 py-0.5 rounded-md ${badgeStyle}">
+                                        ${item.scenarioHint}
+                                    </span>
+                                </div>
+                                <h2 class="font-serif text-lg sm:text-xl font-bold text-espresso mt-1 leading-snug">
+                                    ${item.name}
+                                </h2>
+                            </div>
+                        </div>
+
+                        <!-- 投票勾選按鈕 -->
+                        <button onclick="toggleVote('${item.id}')" aria-label="投票給${item.shortName}"
+                            class="shrink-0 flex flex-col items-center justify-center px-3 py-2 rounded-xl border transition-all ${isSelected ? 'bg-terracotta text-white border-terracotta shadow-sm' : 'bg-paper text-mocha border-sand hover:border-terracotta'}">
+                            <span class="text-base leading-none">${isSelected ? '❤️' : '🤍'}</span>
+                            <span class="text-[11px] font-bold mt-1">${isSelected ? '已選' : '想吃'}</span>
+                        </button>
+                    </div>
+
+                    <!-- 特色標籤列 -->
+                    <div class="flex flex-wrap gap-1.5 mt-3.5">
+                        ${item.tags.map(tag => `
+                            <span class="text-xs font-medium bg-paper text-espresso border border-sand px-2.5 py-1 rounded-lg">
+                                # ${tag}
+                            </span>
+                        `).join('')}
+                    </div>
+
+                    <!-- 核心亮點（永遠顯示） -->
+                    <div class="mt-3.5 bg-paper/80 rounded-xl p-3 border border-sand/60">
+                        <div class="text-xs font-bold text-terracotta mb-1 flex items-center gap-1">
+                            <span>✨ 主打與網友推薦</span>
+                        </div>
+                        <p class="text-sm text-espresso leading-relaxed">
+                            ${item.highlights}
+                        </p>
+                    </div>
+
+                    <!-- 可展開/收合的詳細資訊區 -->
+                    <div class="${isExpanded ? 'block' : 'hidden'} mt-3.5 space-y-2.5 text-sm border-t border-sand/70 pt-3.5" id="details-${item.id}">
+                        <div class="flex items-start gap-2">
+                            <span class="shrink-0 text-base">🛋️</span>
+                            <div>
+                                <span class="font-bold text-espresso">餐廳氛圍：</span>
+                                <span class="text-mocha leading-relaxed">${item.vibe}</span>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="shrink-0 text-base">🕒</span>
+                            <div>
+                                <span class="font-bold text-espresso">營業時間：</span>
+                                <span class="text-mocha">${item.hours}</span>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="shrink-0 text-base">📍</span>
+                            <div>
+                                <span class="font-bold text-espresso">店家地址：</span>
+                                <span class="text-mocha">${item.address}</span>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-2 bg-terracotta/5 p-2.5 rounded-xl">
+                            <span class="shrink-0 text-base">💡</span>
+                            <div class="text-xs sm:text-sm">
+                                <span class="font-bold text-terracotta">貼心提醒：</span>
+                                <span class="text-espresso">${item.note}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 卡片底部操作列：展開/收合 + Google 地圖導航 -->
+                    <div class="mt-4 pt-3 border-t border-sand/60 flex items-center justify-between gap-2">
+                        <button onclick="toggleExpand('${item.id}')" class="text-xs font-bold text-mocha hover:text-espresso py-2 px-2.5 rounded-lg flex items-center gap-1 transition-colors">
+                            <span>${isExpanded ? '收合詳細資訊' : '展開環境與時間'}</span>
+                            <svg class="w-3.5 h-3.5 transition-transform ${isExpanded ? 'rotate-180' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                            </svg>
+                        </button>
+
+                        <a href="${item.mapUrl}" target="_blank" rel="noopener noreferrer" 
+                           class="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-matcha bg-matcha/10 hover:bg-matcha hover:text-white px-3.5 py-2 rounded-xl transition-all">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+                            開啟 Google 地圖
+                        </a>
+                    </div>
+                </article>
+                `;
+                container.insertAdjacentHTML('beforeend', cardHtml);
+            });
+        }
+
+        // 情境篩選功能
+        function filterRestaurants(filterKey) {
+            currentFilter = filterKey;
+            
+            // 更新按鈕樣式
+            document.querySelectorAll('.filter-btn').forEach(btn => {
+                if (btn.dataset.filter === filterKey) {
+                    btn.className = 'filter-btn active shrink-0 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all bg-espresso text-paper shadow-sm';
+                } else {
+                    btn.className = 'filter-btn shrink-0 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-medium transition-all bg-white text-espresso border border-sand hover:border-espresso/40';
+                }
+            });
+
+            // 若篩選特定餐廳，自動確保該餐廳為展開狀態
+            if (filterKey !== 'all') {
+                expandedIds.add(filterKey);
+            }
+
+            renderRestaurants();
+        }
+
+        // 展開/收合詳細資訊
+        function toggleExpand(id) {
+            if (expandedIds.has(id)) {
+                expandedIds.delete(id);
+            } else {
+                expandedIds.add(id);
+            }
+            renderRestaurants();
+        }
+
+        // 投票勾選切換
+        function toggleVote(id) {
+            if (selectedIds.has(id)) {
+                selectedIds.delete(id);
+            } else {
+                selectedIds.add(id);
+            }
+            renderRestaurants();
+            updateVoteBar();
+        }
+
+        // 更新底部投票狀態列
+        function updateVoteBar() {
+            const countEl = document.getElementById('selected-count');
+            const previewEl = document.getElementById('selected-preview');
+            const copyBtn = document.getElementById('copy-vote-btn');
+
+            if (selectedIds.size === 0) {
+                countEl.textContent = '尚未選擇';
+                previewEl.textContent = '請在上方卡片勾選你想吃的餐廳';
+                copyBtn.disabled = true;
+                copyBtn.className = 'shrink-0 px-4 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-1.5 bg-sand text-mocha cursor-not-allowed';
+            } else {
+                const names = restaurants
+                    .filter(r => selectedIds.has(r.id))
+                    .map(r => r.shortName);
+                
+                countEl.textContent = `已選 ${selectedIds.size} 間`;
+                previewEl.textContent = `我投給：${names.join('、')}`;
+                copyBtn.disabled = false;
+                copyBtn.className = 'shrink-0 px-4 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-1.5 bg-terracotta text-white shadow-md hover:bg-terracotta/90 active:scale-95 cursor-pointer';
+            }
+        }
+
+        // 一鍵複製投票結果到剪貼簿（使用 execCommand 確保在各類 WebView / iframe 環境穩定運作）
+        function copyVoteToClipboard() {
+            if (selectedIds.size === 0) return;
+
+            const names = restaurants
+                .filter(r => selectedIds.has(r.id))
+                .map(r => r.shortName);
+
+            const voteText = `我投給：${names.join('、')}！（忠孝新生聚餐三選一）`;
+
+            const textArea = document.createElement('textarea');
+            textArea.value = voteText;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-9999px';
+            document.body.appendChild(textArea);
+            textArea.select();
+
+            try {
+                document.execCommand('copy');
+                showToast(`已複製：「${voteText}」`);
+            } catch (err) {
+                showToast('複製失敗，請手動選取文字複製');
+            } finally {
+                document.body.removeChild(textArea);
+            }
+        }
+
+        // 顯示 Toast 提示訊息
+        let toastTimer;
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-message');
+            toastMsg.textContent = msg;
+
+            toast.classList.remove('opacity-0', '-translate-y-2');
+            toast.classList.add('opacity-100', 'translate-y-0');
+
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', '-translate-y-2');
+            }, 2800);
+        }
+
+        // 頁面載入初始化
+        window.addEventListener('DOMContentLoaded', () => {
+            renderRestaurants();
+            updateVoteBar();
+        });
+    </script>
+</body>
+</html>
